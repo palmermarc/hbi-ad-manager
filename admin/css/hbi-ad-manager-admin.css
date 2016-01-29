@@ -1,0 +1,6 @@
+#admap_table th,#admap_table td { width: 100px; margin: 3px 5px; }
+.remove_ad_conditional { color: red; cursor: pointer; display: inline-block; }
+#add_another_conditional { color: blue; cursor: pointer; display: block; }
+#logical-operator { display: none; }
+#logical-operator.show { display: block; }
+body.settings_page_hbi_ad_manager .one-third { display: table-cell; padding: 15px 25px;  }
