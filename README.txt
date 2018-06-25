@@ -3,10 +3,13 @@ Contributors: palmermarc
 Donate link: http://www.hubbardradio.com/
 Tags: ads, dfp, ad manager
 Requires at least: 3.0.1
+GitHub Plugin URI: https://github.com/palmermarc/hbi-ad-manager
 Tested up to: 3.4
 Stable tag: 4.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+
+~Current Version:2.1.0~
 
 HBI Ad Manger is a proprietary ad manager written by Hubbard Radio
 
@@ -39,6 +42,10 @@ Yes. setTargeting was added in 2.0
 None yet. We'll get there..
 
 == Changelog ==
+
+= 2.1.0 =
+* Added in modules for Beaver Builder to display the ad
+* Fixed an issue that was causing the ad maps to break the ads
 
 = 2.0.2 =
 * Fixed an issue that was causing conditionals to not save properly

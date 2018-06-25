@@ -4,3 +4,7 @@
 #logical-operator { display: none; }
 #logical-operator.show { display: block; }
 body.settings_page_hbi_ad_manager .one-third { display: table-cell; padding: 15px 25px;  }
+
+.uploaded_image{display: block; width: 200px;}
+.uploaded_image img{width: 200px;}
+.featured_image_upload{display: block; margin-bottom: 10px;}

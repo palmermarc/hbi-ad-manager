@@ -75,7 +75,7 @@ class HBI_Ad_Manager {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
-
+    $this->define_post_type_hooks();
 	}
 
 	/**
@@ -119,6 +119,12 @@ class HBI_Ad_Manager {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-hbi-ad-manager-public.php';
 
+    /**
+     * The class responsible for defining all actions that occur involving post-type
+     * actions of the site.
+     */
+    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-hbi-ad-manager-post-types.php';
+
 		$this->loader = new HBI_Ad_Manager_Loader();
 
 	}
@@ -151,28 +157,28 @@ class HBI_Ad_Manager {
 	private function define_admin_hooks() {
 		$plugin_admin = new HBI_Ad_Manager_Admin( $this->get_plugin_name(), $this->get_version() );
 
-        /* Add the necessary style and script files in the admin */
+    /* Add the necessary style and script files in the admin */
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
         
-        /* Update the "Enter Title Here" placeholder */
-        $this->loader->add_action( 'enter_title_here', $plugin_admin, 'custom_ad_unit_title' );
-        
-        /* Register the settings page */ 
-        $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_hbi_ad_manager_options_page' );
-        $this->loader->add_action( 'admin_init', $plugin_admin, 'register_hbi_ad_manager_settings' );
-        
-        /* Register the metabox */
-        $this->loader->add_action( 'load-post.php', $plugin_admin, 'hbi_ad_manager_register_meta_boxes');
-        $this->loader->add_action( 'load-post-new.php', $plugin_admin, 'hbi_ad_manager_register_meta_boxes');
-        
-        /* Register and display the custom columns */
-        $this->loader->add_action( 'admap_edit_form_fields', $plugin_admin, 'display_admap_custom_fields' );
-        $this->loader->add_action( 'edited_admap', $plugin_admin, 'save_admap_custom_fields', 10, 2 );
-        
-        /* Register the custom columns and display their values */
-        $this->loader->add_filter( 'manage_edit-ad_unit_columns', $plugin_admin, 'set_custom_ad_unit_columns' );
-        $this->loader->add_action( 'manage_ad_unit_posts_custom_column', $plugin_admin, 'custom_ad_unit_column', 10, 2 );
+    /* Update the "Enter Title Here" placeholder */
+    $this->loader->add_action( 'enter_title_here', $plugin_admin, 'custom_ad_unit_title' );
+
+    /* Register the settings page */
+    $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_hbi_ad_manager_options_page' );
+    $this->loader->add_action( 'admin_init', $plugin_admin, 'register_hbi_ad_manager_settings' );
+
+    /* Register the metabox */
+    $this->loader->add_action( 'load-post.php', $plugin_admin, 'hbi_ad_manager_register_meta_boxes');
+    $this->loader->add_action( 'load-post-new.php', $plugin_admin, 'hbi_ad_manager_register_meta_boxes');
+
+    /* Register and display the custom columns */
+    $this->loader->add_action( 'admap_edit_form_fields', $plugin_admin, 'display_admap_custom_fields' );
+    $this->loader->add_action( 'edited_admap', $plugin_admin, 'save_admap_custom_fields', 10, 2 );
+
+    /* Register the custom columns and display their values */
+    $this->loader->add_filter( 'manage_edit-ad_unit_columns', $plugin_admin, 'set_custom_ad_unit_columns' );
+    $this->loader->add_action( 'manage_ad_unit_posts_custom_column', $plugin_admin, 'custom_ad_unit_column', 10, 2 );
 	}
 
 	/**
@@ -185,16 +191,33 @@ class HBI_Ad_Manager {
 	private function define_public_hooks() {
 		$plugin_public = new HBI_Ad_Manager_Public( $this->get_plugin_name(), $this->get_version() );
         
-        /* Register the post type and taxonomies that the plugin requires */
-        $this->loader->add_action( 'init', $plugin_public, 'register_ad_mapping' );
-        $this->loader->add_action( 'init', $plugin_public, 'register_ad_units_post_type' );
-        
-        /* Display the ad units into the WordPress Header */
-        $this->loader->add_action( 'wp_head', $plugin_public, 'inject_hbi_ad_manager_into_header' );
-        
-        /* Register the DFP Ad Unit widget */
-        $this->loader->add_action( 'widgets_init', $plugin_public, 'register_display_dfp_ads_widget' );
-    }
+    /* Display the ad units into the WordPress Header */
+    $this->loader->add_action( 'wp_head', $plugin_public, 'inject_hbi_ad_manager_into_header' );
+
+    /* Register the DFP Ad Unit widget */
+    $this->loader->add_action( 'widgets_init', $plugin_public, 'register_display_dfp_ads_widget' );
+    $this->loader->add_action( 'init', $plugin_public, 'load_bb_module' );
+
+    $this->loader->add_action( 'wp_head', $plugin_public, 'render_bb_takeover' );
+
+    $this->loader->add_filter( 'body_class', $plugin_public, 'set_body_class_on_takeover' );
+
+  }
+
+  /**
+   * Register all of the hooks related to the public-facing functionality
+   * of the plugin.
+   *
+   * @since    0.1
+   * @access   private
+   */
+  private function define_post_type_hooks() {
+    $plugin_post_types = new HBI_Ad_Manager_Post_Types( $this->get_plugin_name(), $this->get_version() );
+
+    /* Register the post type and taxonomies that the plugin requires */
+    $this->loader->add_action( 'init', $plugin_post_types, 'register_ad_mapping' );
+    $this->loader->add_action( 'init', $plugin_post_types, 'register_ad_units_post_type' );
+  }
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
