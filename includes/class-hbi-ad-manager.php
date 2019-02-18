@@ -69,7 +69,7 @@ class HBI_Ad_Manager {
 	public function __construct() {
 
 		$this->plugin_name = 'hbi-ad-manager';
-		$this->version = '2.0.1';
+		$this->version = '3.0';
 
 		$this->load_dependencies();
 		$this->set_locale();

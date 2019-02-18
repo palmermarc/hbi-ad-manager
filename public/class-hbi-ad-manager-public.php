@@ -96,15 +96,12 @@ class HBI_Ad_Manager_Public {
     $options =  get_option('hbi_ad_manager_settings');
 
     /** Call in the appropriate header based on whether or not asynchronous rendering is enabled */
-    echo ( $options['async_rendering'] ) ?
-      "<script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
-      <script>
-        var googletag = googletag || {};
-        googletag.cmd = googletag.cmd || [];
-      </script>"
-    : "<script src='https://www.googletagservices.com/tag/js/gpt.js'></script>";
-
     ?>
+    <script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
+    <script>
+      var googletag = googletag || {};
+      googletag.cmd = googletag.cmd || [];
+    </script>
     <script>
       googletag.cmd.push(function() {
         <?php
@@ -503,9 +500,9 @@ class HBI_Ad_Manager_Public {
       <?php } else { ?>
       <div id="ad-unit-<?php echo $ad_unit_id_tag; ?>">
         <script type='text/javascript'>
-          <?php if( 1 === $options['async_rendering'] ) : ?> googletag.cmd.push(function () { <?php endif; ?>
+          googletag.cmd.push(function () {
             googletag.display('ad-unit-<?php echo $ad_unit_id_tag; ?>');
-            <?php if( 1 === $options['async_rendering'] ) : ?> }); <?php endif; ?>
+          });
         </script>
       </div>
       <?php
