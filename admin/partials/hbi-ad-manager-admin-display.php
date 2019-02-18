@@ -13,7 +13,6 @@
  */
 ?>
 <div class="wrap">
-    <?php screen_icon(); ?>
     <form method="post" action="options.php">
     <?php
     settings_fields( 'hbi_ad_manager_option_group' );
