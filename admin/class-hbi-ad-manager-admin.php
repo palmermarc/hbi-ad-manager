@@ -81,26 +81,30 @@ class HBI_Ad_Manager_Admin {
     global $pagenow;
     global $post;
 
-    wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/hbi-ad-manager-admin.js', array( 'jquery' ), $this->version, true );
+    wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/hbi-ad-manager-admin.js', array( 'jquery','jquery-ui-datepicker' ), $this->version, true );
 
     $screen  = get_current_screen();
-    $version = FL_THEME_BUILDER_VERSION;
 
 		if( $screen->post_type == 'takeover' ) {
       $object = get_post_type_object( $screen->post_type );
 
       // Scripts
-      wp_enqueue_script( 'jquery-tiptip', FL_BUILDER_URL . 'js/jquery.tiptip.min.js', array( 'jquery' ), $version, true );
-      wp_enqueue_script( 'select2', FL_THEME_BUILDER_URL . 'js/select2.full.min.js', array( 'jquery' ), $version, true );
-      wp_enqueue_script( 'fl-theme-builder-layout-admin-edit', FL_THEME_BUILDER_URL . 'js/fl-theme-builder-layout-admin-edit.js', array( 'wp-util' ), $version );
+      wp_enqueue_script( 'jquery-tiptip', FL_BUILDER_URL . 'js/jquery.tiptip.min.js', array( 'jquery' ) );
+      wp_enqueue_script( 'select2', FL_THEME_BUILDER_URL . 'js/select2.full.min.js', array( 'jquery' ) );
+      wp_enqueue_script( 'fl-theme-builder-layout-admin-edit', FL_THEME_BUILDER_URL . 'js/fl-theme-builder-layout-admin-edit.js', array( 'wp-util' ) );
+      include_once( FL_THEME_BUILDER_DIR . 'classes/class-fl-theme-builder-rules-location.php' );
+      include_once( FL_THEME_BUILDER_DIR . 'classes/class-fl-theme-builder-rules-user.php' );
 
-      // JS Config
+
+      $bb_location_rules = new FLThemeBuilderRulesLocation();
+      $FLThemeBuilderRulesUser = new FLThemeBuilderRulesUser();
+
       wp_localize_script( 'fl-theme-builder-layout-admin-edit', 'FLThemeBuilderConfig', array(
-        'locations' => FLThemeBuilderRulesLocation::get_admin_edit_config(),
-        'exclusions' => FLThemeBuilderRulesLocation::get_exclusions_admin_edit_config(),
+        'locations' => $bb_location_rules->get_admin_edit_config(),
+        'exclusions' => $bb_location_rules->get_exclusions_admin_edit_config(),
         'nonce' => wp_create_nonce( 'fl-theme-builder' ),
         'postType' => $screen->post_type,
-        'userRules' => FLThemeBuilderRulesUser::get_saved( $post->ID ),
+        'userRules' => $FLThemeBuilderRulesUser::get_saved( $post->ID ),
         'strings' => array(
           'allObjects' => _x( 'All %s', '%s is the post or taxonomy name.', 'fl-theme-builder' ),
           'alreadySaved' => _x( 'This location has already been added to the "%1$s" %2$s. Would you like to remove it and add it to this %1$s?', '%1$s is the post title. %2$s is the post type label.', 'fl-theme-builder' ),
@@ -111,8 +115,6 @@ class HBI_Ad_Manager_Admin {
           'search' => __( 'Search...', 'fl-theme-builder' ),
         ),
       ) );
-
-      wp_enqueue_script( 'jquery-ui-datepicker' );
     }
 	}
     
@@ -223,11 +225,11 @@ class HBI_Ad_Manager_Admin {
   function hbi_ad_manager_meta_boxes() {
     add_meta_box( 'ad-unit-details', esc_html__( 'Ad Unit Details', '' ), array( $this, 'hbi_ad_manager_meta_box' ), 'ad_unit' );
 
+    add_meta_box( 'takeover-details', esc_html__( 'Takeover Details', '' ), array( $this, 'hbi_ad_manager_takeover_meta_box' ), 'takeover' );
+
     if( class_exists( 'FLThemeBuilderLoader' ) ) {
       add_meta_box('takeover-locations', esc_html__('Takeover Location', ''), array($this, 'hbi_ad_manager_takeover_location_meta_box'), 'takeover');
     }
-
-    add_meta_box( 'takeover-details', esc_html__( 'Takeover Details', '' ), array( $this, 'hbi_ad_manager_takeover_meta_box' ), 'takeover' );
   }
     
   function hbi_ad_manager_meta_box( $post ) {
@@ -474,10 +476,15 @@ class HBI_Ad_Manager_Admin {
     $bb_location_rules = new FLThemeBuilderRulesLocation();
     global $post;
 
-    $locations = $bb_location_rules::get_all();
-    $post_type = get_post_type_object( $post->post_type );
+    $type     = 'takeover';
+    $order    = get_post_meta( $post->ID, '_fl_theme_layout_order', true );
+    $hook     = get_post_meta( $post->ID, '_fl_theme_layout_hook', true );
+    $settings = FLThemeBuilderLayoutData::get_settings( $post->ID );
+    $hooks    = FLThemeBuilderLayoutData::get_part_hooks();
 
-    wp_nonce_field( basename( __FILE__ ), 'takeover_location' );
+    include FL_THEME_BUILDER_DIR . 'includes/layout-admin-edit-settings.php';
+
     $bb_location_rules::render_admin_edit_settings();
+    FLThemeBuilderRulesUser::render_admin_edit_settings();
   }
 }

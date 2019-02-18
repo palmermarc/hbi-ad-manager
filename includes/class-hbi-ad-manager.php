@@ -190,6 +190,8 @@ class HBI_Ad_Manager {
 	 */
 	private function define_public_hooks() {
 		$plugin_public = new HBI_Ad_Manager_Public( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_targeting_scripts' );
         
     /* Display the ad units into the WordPress Header */
     $this->loader->add_action( 'wp_head', $plugin_public, 'inject_hbi_ad_manager_into_header' );
@@ -201,6 +203,8 @@ class HBI_Ad_Manager {
     $this->loader->add_action( 'wp_head', $plugin_public, 'render_bb_takeover' );
 
     $this->loader->add_filter( 'body_class', $plugin_public, 'set_body_class_on_takeover' );
+
+    $this->loader->add_action( 'admin_bar_menu',$plugin_public,  'add_dfp_add_targeting_toolbar', 999 );
 
   }
 

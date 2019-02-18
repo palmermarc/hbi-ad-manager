@@ -83,6 +83,15 @@ class HBI_Ad_Manager_Public {
     $this->conditional_functions = array('comments_open','has_tag','has_term','in_category','is_404','is_admin','is_archive','is_attachment','is_author','is_category','is_child_theme','is_comments_popup','is_date','is_day','is_feed','is_front_page','is_home','is_month','is_multi_author','is_multisite','is_main_site','is_page','is_page_template','is_paged','is_preview','is_rtl','is_search','is_single','is_singular','is_sticky','is_super_admin','is_tag','is_tax','is_time','is_trackback','is_year','pings_open');
   }
 
+  public function enqueue_targeting_scripts(){
+    if( current_user_can( 'edit_theme_options' ) ) {
+      wp_register_script( 'toolbar-dfp-ad-targeting', plugin_dir_url( __FILE__ ) . 'js/ad-targeting.js', array( 'jquery' ), false, true );
+      wp_localize_script( 'toolbar-dfp-ad-targeting', 'dfp_ad_targets', self::get_ad_targeting() );
+      wp_enqueue_script( 'toolbar-dfp-ad-targeting' );
+    }
+  }
+
+
   public function inject_hbi_ad_manager_into_header() {
     $options =  get_option('hbi_ad_manager_settings');
 
@@ -135,8 +144,9 @@ class HBI_Ad_Manager_Public {
               $admap = $ad_unit['admap'];
 
               $admap_string = (0 != absint( $ad_unit['admap'] )) ? ".defineSizeMapping({$admaps[$admap]['slug']})" :  '';
-
-              echo "googletag.defineSlot('/{$ad_unit['dfp_network_code']}/{$ad_unit['dfp_ad_unit']}', [{$ad_unit['width']}, {$ad_unit['height']}], '{$ad_unit['tag_id']}'){$admap_string}.addService(googletag.pubads());\r\n";
+              $ad_slot = str_replace( '-', '_', $ad_unit['tag_id'] );
+              echo "var $ad_slot = googletag.defineSlot('/{$ad_unit['dfp_network_code']}/{$ad_unit['dfp_ad_unit']}', [{$ad_unit['width']}, {$ad_unit['height']}], '{$ad_unit['tag_id']}'){$admap_string}.setCollapseEmptyDiv(true).addService(googletag.pubads());\r\n";
+              echo "console.log($ad_slot);";
             }
 
           endforeach;
@@ -157,6 +167,10 @@ class HBI_Ad_Manager_Public {
         <?php } ?>
 
         googletag.enableServices();
+
+        googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+          console.log(event);
+        });
       });
     </script>
     <?php
@@ -259,12 +273,11 @@ class HBI_Ad_Manager_Public {
     $active_takeover = self::get_takeover_id();
 
     if( is_numeric( $active_takeover ) && get_post_meta( $active_takeover, 'takeover_ad_targeting', TRUE ) ) {
-      $targets['has_takeover'] = "takeover_ad_targeting";
+      $targets['has_takeover'] = true;
       $targets['takeover_id'] = "$active_takeover";
     }
 
     return $targets;
-
   }
 
   /**
@@ -278,7 +291,6 @@ class HBI_Ad_Manager_Public {
   static function get_ad_units() {
     $cache_key = 'ad_units';
     $cache_group = 'hbi-ad-manager';
-    wp_cache_delete( $cache_key, $cache_group );
     $ad_units_formatted = wp_cache_get( $cache_key, $cache_group );
 
     if( false === $ad_units_formatted ) :
@@ -451,10 +463,8 @@ class HBI_Ad_Manager_Public {
    * @since		2.0.0
    */
   function load_bb_module() {
-    if ( class_exists( 'FLBuilder' ) ) {
       include_once( HBI_AD_DIR . 'bb-modules/ad-unit/ad-unit.php' );
-      include_once( HBI_AD_DIR . 'bb-modules/dfp-content-grid/dfp-content-grid.php' );
-    }
+      //include_once( HBI_AD_DIR . 'bb-modules/dfp-content-grid/dfp-content-grid.php' );
   }
 
   /**
@@ -677,5 +687,22 @@ class HBI_Ad_Manager_Public {
       $classes[] = "takeover-{$active_takeover}";
     }
     return $classes;
+  }
+
+  function add_dfp_add_targeting_toolbar( $wp_admin_bar ) {
+    $args = array(
+      'id'    => 'dfp_ad_targeting',
+      'title' => 'DFP Ad Targeting',
+      'href'  => "#",
+    );
+
+    $wp_admin_bar->add_node( $args );
+
+    $wp_admin_bar->add_group(
+      [
+        'id' => 'dfp_ad_targets',
+        'parent' => 'dfp_ad_targeting',
+      ]
+    );
   }
 }
