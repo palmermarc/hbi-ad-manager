@@ -146,7 +146,6 @@ class HBI_Ad_Manager_Public {
               $admap_string = (0 != absint( $ad_unit['admap'] )) ? ".defineSizeMapping({$admaps[$admap]['slug']})" :  '';
               $ad_slot = str_replace( '-', '_', $ad_unit['tag_id'] );
               echo "var $ad_slot = googletag.defineSlot('/{$ad_unit['dfp_network_code']}/{$ad_unit['dfp_ad_unit']}', [{$ad_unit['width']}, {$ad_unit['height']}], '{$ad_unit['tag_id']}'){$admap_string}.setCollapseEmptyDiv(true).addService(googletag.pubads());\r\n";
-              echo "console.log($ad_slot);";
             }
 
           endforeach;
@@ -167,10 +166,6 @@ class HBI_Ad_Manager_Public {
         <?php } ?>
 
         googletag.enableServices();
-
-        googletag.pubads().addEventListener('slotRenderEnded', function(event) {
-          console.log(event);
-        });
       });
     </script>
     <?php
@@ -463,8 +458,10 @@ class HBI_Ad_Manager_Public {
    * @since		2.0.0
    */
   function load_bb_module() {
+    if ( class_exists( 'FLBuilder' ) ) {
       include_once( HBI_AD_DIR . 'bb-modules/ad-unit/ad-unit.php' );
-      //include_once( HBI_AD_DIR . 'bb-modules/dfp-content-grid/dfp-content-grid.php' );
+      include_once( HBI_AD_DIR . 'bb-modules/dfp-content-grid/dfp-content-grid.php' );
+    }
   }
 
   /**
