@@ -159,14 +159,6 @@ class HBI_Ad_Manager_Admin {
     );
 
     add_settings_field(
-      'async_or_sync',
-      'Enable asynchronous rendering',
-      array( $this, 'enable_asnyc_rendering_callback' ),
-      'hbi_ad_manager',
-      'hbi_ad_manager_options_section'
-    );
-
-    add_settings_field(
       'active_conditionals',
       'Activate Conditional Functions',
       array( $this, 'activate_conditional_functions' ),
@@ -179,7 +171,6 @@ class HBI_Ad_Manager_Admin {
     $new_input = array();
 
     $new_input['single_request'] = ( isset( $input['single_request'] ) ) ? 1 : 0;
-    $new_input['async_rendering'] = ( isset( $input['async_rendering'] ) ) ? 1 : 0;
 
     $new_conditionals = array();
     foreach( $input['active_conditionals'] as $function => $use ) {
@@ -214,12 +205,6 @@ class HBI_Ad_Manager_Admin {
       if( $count == 20 ) { echo '</div>'; $count = 0; }
     }
     echo '<div class="clearfix"></div>';
-  }
-    
-  function hbi_ad_manager_register_meta_boxes() {
-    add_action( 'add_meta_boxes', array( $this, 'hbi_ad_manager_meta_boxes' ) );
-    add_action( 'save_post', array( $this, 'hbi_ad_manager_save_meta_boxes' ) );
-    add_action( 'save_post', array( $this, 'hbi_ad_manager_save_takeover_metabox' ) );
   }
     
   function hbi_ad_manager_meta_boxes() {
