@@ -206,8 +206,8 @@ class HBI_Ad_Manager_Admin {
     }
     echo '<div class="clearfix"></div>';
   }
-    
-  function hbi_ad_manager_meta_boxes() {
+
+  function hbi_ad_manager_register_meta_boxes() {
     add_meta_box( 'ad-unit-details', esc_html__( 'Ad Unit Details', '' ), array( $this, 'hbi_ad_manager_meta_box' ), 'ad_unit' );
 
     add_meta_box( 'takeover-details', esc_html__( 'Takeover Details', '' ), array( $this, 'hbi_ad_manager_takeover_meta_box' ), 'takeover' );
